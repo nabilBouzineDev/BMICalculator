@@ -5,5 +5,6 @@
 
     <color name="layout_background">#222830</color>
     <color name="card_background">#28425C</color>
-    <color name="text_hint">#4B4F5E</color>
+    <color name="text_hint">#76788E</color>
+    <color name="button_bg">#8C712F</color>
 </resources>
