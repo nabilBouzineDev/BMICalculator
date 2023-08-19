@@ -1,5 +1,6 @@
 package com.nabilbdev.bmicalculator
 
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -9,17 +10,23 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var sharedPref: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
+    private lateinit var weightId: EditText
+    private lateinit var heightId: EditText
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val weightText = findViewById<EditText>(R.id.etWeight)
-        val heightText = findViewById<EditText>(R.id.etHeight)
+        weightId = findViewById(R.id.etWeight)
+        heightId = findViewById(R.id.etHeight)
         val calculateButton = findViewById<Button>(R.id.btnCalculate)
 
         calculateButton.setOnClickListener {
-            val weight = weightText.text.toString()
-            val height = heightText.text.toString()
+            val weight = weightId.text.toString()
+            val height = heightId.text.toString()
 
             if (validateInput(weight, height)) {
                 val bmi = weight.toFloat() / ((height.toFloat() / 100) * (height.toFloat() / 100))
@@ -27,6 +34,33 @@ class MainActivity : AppCompatActivity() {
                 val bmi2Digit = String.format("%.2f", bmi).toFloat()
                 displayResult(bmi2Digit)
             }
+        }
+        sharedPref = getSharedPreferences("sf", MODE_PRIVATE)
+        editor = sharedPref.edit()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        val weight = weightId.text.toString()
+        val height = heightId.text.toString()
+
+        editor.apply {
+            putInt("weight_sf", weight.toInt())
+            putInt("height_sf", height.toInt())
+            commit()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val weightValue = sharedPref.getInt("weight_sf", 0)
+        val heightValue = sharedPref.getInt("height_sf", 0)
+
+        if (weightValue != 0 && heightValue != 0) {
+            weightId.setText(weightValue.toString())
+            heightId.setText(heightValue.toString())
         }
     }
 
@@ -49,8 +83,8 @@ class MainActivity : AppCompatActivity() {
         indexResult.text = bmi.toString()
 
         // underweight, normal, overweight, and obese levels
-        var bodyLevel = ""
-        var color = 0
+        val bodyLevel: String
+        val color: Int
 
         when {
             bmi < 18.50 -> { bodyLevel = "Underweight"; color = R.color.under_weight }
@@ -63,4 +97,3 @@ class MainActivity : AppCompatActivity() {
         descriptionResult.text = bodyLevel
     }
 }
-
